@@ -118,21 +118,6 @@ def alert_by_mail(abm_from_email, abm_from_email_password, abm_to_email, abm_que
                       "Failed to send alert mail. Exception: %s\n\n" % (traceback.format_exc()))
         print("Failed to send alert mail. Exception: %s\n\n" % (traceback.format_exc()))
 
-
-def threshold_crossed(tc_threshold_count, tc_threshold_rate, tc_messages_count, tc_ack_rate):
-    if (tc_messages_count >= tc_threshold_count) and (tc_ack_rate <= tc_threshold_rate):
-        return True
-    else:
-        return False
-
-
-def is_sidelined(is_rabbitmq_threshold_messages_count):
-    if is_rabbitmq_threshold_messages_count != 0:
-        return True
-    else:
-        return False
-
-
 if __name__ == '__main__':
 
     api_rabbitmq_queues = "http://%s:%s/api/queues/%s/%s"
@@ -148,14 +133,13 @@ if __name__ == '__main__':
                       "RMQ Alert -> Messages: " + str(rabbitmq_messages_count) + " | Ack rate: " + str(rabbitmq_ack_rate))
         print("Messages: " + str(rabbitmq_messages_count) + " | Ack rate: " + str(rabbitmq_ack_rate))
         if rabbitmq_threshold_messages_count == 0:
-            if is_sidelined(rabbitmq_messages_count):
+            if rabbitmq_messages_count != 0:
                 mail_subject = "[RabbitMQ Alert] Sideline in %s at around %s"
                 alert_by_mail(email_from_address, email_from_password, email_to_address, rabbitmq_queue_name,
                               rabbitmq_queue_alias, email_host, email_port, rabbitmq_messages_count, "N/A",
                               mail_subject)
         else:
-            if threshold_crossed(rabbitmq_threshold_messages_count, rabbitmq_threshold_ack_rate,
-                                 rabbitmq_messages_count, rabbitmq_ack_rate):
+            if (rabbitmq_messages_count >= rabbitmq_threshold_messages_count) and (rabbitmq_ack_rate <= rabbitmq_threshold_ack_rate):
                 mail_subject = "[RabbitMQ Alert] Low throughput in %s at around %s"
                 alert_by_mail(email_from_address, email_from_password, email_to_address, rabbitmq_queue_name,
                               rabbitmq_queue_alias, email_host, email_port, rabbitmq_messages_count, rabbitmq_ack_rate,
