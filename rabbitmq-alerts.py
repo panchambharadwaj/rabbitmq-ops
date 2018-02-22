@@ -6,11 +6,9 @@ import sys
 import syslog
 import traceback
 import urllib
+import requests
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-
-import requests
-
 
 def check_arg(args=None):
     parser = argparse.ArgumentParser(description="Script to get RabbitMQ Email Alerts")
@@ -118,10 +116,7 @@ def alert_by_mail(abm_from_email, abm_from_email_password, abm_to_email, abm_que
                       "Failed to send alert mail. Exception: %s\n\n" % (traceback.format_exc()))
         print("Failed to send alert mail. Exception: %s\n\n" % (traceback.format_exc()))
 
-if __name__ == '__main__':
-
-    api_rabbitmq_queues = "http://%s:%s/api/queues/%s/%s"
-
+def main():
     try:
         rabbitmq_host, rabbitmq_port, rabbitmq_vhost, rabbitmq_authentication, rabbitmq_queue_name, rabbitmq_queue_alias, rabbitmq_threshold_messages_count, rabbitmq_threshold_ack_rate, email_from_address, email_from_password, email_to_address, email_host, email_port = check_arg(
             sys.argv[1:])
@@ -148,3 +143,7 @@ if __name__ == '__main__':
         syslog.syslog(syslog.LOG_ERR,
                       "RMQ Alert -> Error: " + traceback.format_exc())
         print(traceback.format_exc())
+
+if __name__ == '__main__':
+    api_rabbitmq_queues = "http://%s:%s/api/queues/%s/%s"
+    main()
